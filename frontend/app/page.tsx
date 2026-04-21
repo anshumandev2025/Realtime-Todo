@@ -14,7 +14,7 @@ export default function Home() {
       </h1>
       <p className="text-lg text-muted-foreground max-w-[600px] mb-10">
         A Trello-like project management board built for speed, collaboration,
-        and simplicity. Whether you are an individual or a huge organization,
+        and simplicity
         keep everyone on the same page instantly.
       </p>
 

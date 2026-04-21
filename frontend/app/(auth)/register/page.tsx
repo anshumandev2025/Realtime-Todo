@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'next/navigation';
@@ -19,16 +18,6 @@ const formSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  accountType: z.enum(['individual', 'organization_owner']),
-  organizationName: z.string().optional(),
-}).refine(data => {
-  if (data.accountType === 'organization_owner' && (!data.organizationName || data.organizationName.length === 0)) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Organization Name is required for Organization Owners',
-  path: ['organizationName'],
 });
 
 export default function RegisterPage() {
@@ -43,12 +32,9 @@ export default function RegisterPage() {
       username: '',
       email: '',
       password: '',
-      accountType: 'individual',
-      organizationName: '',
     },
   });
 
-  const accountType = form.watch('accountType');
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
@@ -88,28 +74,6 @@ export default function RegisterPage() {
             <FormField control={form.control} name="password" render={({ field }) => (
               <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
-
-            <FormField control={form.control} name="accountType" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Account Type</FormLabel>
-                <Select  onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select account type" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent position='item-aligned'>
-                    <SelectItem value="individual">Individual</SelectItem>
-                    <SelectItem value="organization_owner">Organization Owner</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
-
-            {accountType === 'organization_owner' && (
-              <FormField control={form.control} name="organizationName" render={({ field }) => (
-                <FormItem><FormLabel>Organization Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-            )}
 
             <Button type="submit" className="w-full mt-4" disabled={loading}>
               {loading ? 'Creating account...' : 'Sign up'}

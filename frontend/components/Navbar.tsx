@@ -5,12 +5,11 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
-  const { user, isAuthenticated, activeOrganizationId, setActiveOrganizationId, logout } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -18,8 +17,8 @@ export default function Navbar() {
       await api.post('/auth/logout');
       logout();
       router.push('/login');
-    } catch (e) {
-      console.error('Logout failed');
+    } catch (e:any) {
+      console.error('Logout failed', e.response?.data?.message);
     }
   };
 
@@ -29,26 +28,6 @@ export default function Navbar() {
         <Link href="/" className="font-bold text-lg text-primary">
           RealtimeTodo
         </Link>
-        
-        {isAuthenticated && user?.organizations && user.organizations.length > 0 && (
-          <div className="hidden sm:block">
-            <Select 
-              value={activeOrganizationId || ''} 
-              onValueChange={(val) => setActiveOrganizationId(val)}
-            >
-              <SelectTrigger className="w-[180px] h-8 text-sm">
-                <SelectValue placeholder="Select Organization" />
-              </SelectTrigger>
-              <SelectContent>
-                {user.organizations.map((org) => (
-                  <SelectItem key={org._id} value={org._id}>
-                    {org.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
       </div>
 
       <div className="flex items-center gap-4">

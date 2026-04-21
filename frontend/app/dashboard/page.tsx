@@ -16,45 +16,31 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, activeOrganizationId } = useAuthStore();
+  const { user, isAuthenticated  } = useAuthStore();
   const { projects, isLoading, error, fetchProjects, createProject, clear } = useProjectStore();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [projectDesc, setProjectDesc] = useState('');
   const [creating, setCreating] = useState(false);
-
   // Fetch whenever the active org changes
   useEffect(() => {
-    if (activeOrganizationId) {
-      fetchProjects(activeOrganizationId);
+    if (user?.id) {
+      fetchProjects(user.id);
     } else {
       clear();
     }
-  }, [activeOrganizationId, fetchProjects, clear]);
+  }, [user?.id, fetchProjects, clear]);
 
   if (!isAuthenticated) {
     return <div className="p-8 text-center">Please log in to view the dashboard.</div>;
-  }
-
-  if (!activeOrganizationId) {
-    return (
-      <div className="flex justify-center items-center h-[calc(100vh-3.5rem)] text-center px-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">No Organization Selected</h2>
-          <p className="text-muted-foreground">
-            Select an organization from the top menu, or ask an owner to invite you.
-          </p>
-        </div>
-      </div>
-    );
   }
 
   const handleCreateProject = async () => {
     if (!projectName.trim()) return toast.error('Project name is required');
     setCreating(true);
     try {
-      await createProject({ name: projectName, description: projectDesc, organizationId: activeOrganizationId });
+      await createProject({ name: projectName, description: projectDesc});
       toast.success('Project created successfully');
       setIsDialogOpen(false);
       setProjectName('');
@@ -66,17 +52,12 @@ export default function DashboardPage() {
     }
   };
 
-  const activeOrg = user?.organizations?.find((o) => o._id === activeOrganizationId);
-
   return (
     <div className="container max-w-6xl mx-auto py-8 px-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground mt-1">
-            {activeOrg ? `Manage projects in ${activeOrg.name}` : 'Your projects'}
-          </p>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -130,7 +111,7 @@ export default function DashboardPage() {
         <div className="text-destructive">{error}</div>
       ) : projects.length === 0 ? (
         <div className="text-center py-20 border-2 border-dashed rounded-xl bg-muted/20">
-          <p className="text-muted-foreground mb-4">No projects in this organization yet.</p>
+          <p className="text-muted-foreground mb-4">No projects yet created.</p>
           <Button onClick={() => setIsDialogOpen(true)} variant="outline">
             Create your first project
           </Button>

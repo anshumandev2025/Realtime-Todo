@@ -9,7 +9,6 @@ import { initSocket } from "./sockets";
 
 import authRoutes from "./modules/auth/auth.route";
 import userRoutes from "./modules/user/user.route";
-import orgRoutes from "./modules/organization/organization.route";
 import projectRoutes from "./modules/project/project.route";
 import taskRoutes from "./modules/task/task.route";
 
@@ -36,7 +35,6 @@ app.use(cookieParser());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/organizations", orgRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 

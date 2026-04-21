@@ -8,7 +8,6 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from "../../utils/jwt";
-import { Organization } from "../../models/organization.model";
 
 const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
   const accessToken = generateAccessToken(user.id, user.accountType);
@@ -36,17 +35,7 @@ const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
 
 export const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { name, username, email, password, accountType, organizationName } =
-      req.body;
-
-    if (accountType === "organization_owner" && !organizationName) {
-      return next(
-        new AppError(
-          "Organization name is required for organization owners",
-          400,
-        ),
-      );
-    }
+    const { name, username, email, password } = req.body;
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
@@ -58,19 +47,7 @@ export const register = catchAsync(
       username,
       email,
       password,
-      accountType,
     });
-
-    if (accountType === "organization_owner") {
-      const org = await Organization.create({
-        name: organizationName,
-        owner: user._id,
-        members: [{ user: user._id, role: "admin" }],
-      });
-
-      user.organizations.push(org._id as any);
-      await user.save();
-    }
 
     sendTokenResponse(user, 201, res);
   },

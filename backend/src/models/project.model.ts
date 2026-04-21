@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IProjectLabel {
   name: string;
@@ -8,7 +8,6 @@ export interface IProjectLabel {
 export interface IProject extends Document {
   name: string;
   description?: string;
-  organizationId: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   members: mongoose.Types.ObjectId[];
   tasks: mongoose.Types.ObjectId[];
@@ -19,10 +18,9 @@ const ProjectSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
     description: { type: String },
-    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    members: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     labels: [
       {
         name: { type: String },
@@ -30,7 +28,7 @@ const ProjectSchema: Schema = new Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export const Project = mongoose.model<IProject>('Project', ProjectSchema);
+export const Project = mongoose.model<IProject>("Project", ProjectSchema);
