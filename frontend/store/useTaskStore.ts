@@ -5,7 +5,7 @@ export interface Task {
   _id: string;
   title: string;
   description?: string;
-  status:string | 'todo' | 'in-progress' | 'done';
+  status: string | 'todo' | 'in-progress' | 'done';
   projectId: string;
   assignedTo?: string[];
   order: number;
@@ -16,13 +16,17 @@ interface TaskState {
   tasks: Task[];
   isLoading: boolean;
   error: string | null;
-  setTasks:(tasks:Task[])=>void;
+  setTasks: (tasks: Task[]) => void;
   fetchTasks: (projectId: string) => Promise<void>;
   createTask: (payload: { title: string; projectId: string; status?: string }) => Promise<Task>;
+  updateTask: (id: string, payload: Partial<Pick<Task, 'title' | 'description' | 'status' | 'assignedTo' | 'checklist'>>) => Promise<void>;
+  deleteTask: (id: string) => Promise<void>;
   moveTask: (taskId: string, projectId: string, newStatus: string, newOrder: number) => Promise<void>;
+  // Socket-driven (no API call)
   applySocketCreate: (task: Task) => void;
   applySocketUpdate: (task: Task) => void;
   applySocketMove: (task: Pick<Task, '_id' | 'status' | 'order'>) => void;
+  applySocketDelete: (payload: { _id: string }) => void;
   clear: () => void;
 }
 
@@ -30,7 +34,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   isLoading: false,
   error: null,
-  setTasks:(tasks)=>set({tasks}),
+
+  setTasks: (tasks) => set({ tasks }),
+
   fetchTasks: async (projectId) => {
     set({ isLoading: true, error: null });
     try {
@@ -46,6 +52,21 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const newTask: Task = data.data;
     set((state) => ({ tasks: [...state.tasks, newTask] }));
     return newTask;
+  },
+
+  updateTask: async (id, payload) => {
+    const { data } = await api.patch(`/tasks/${id}`, payload);
+    const updatedTask: Task = data.data;
+    set((state) => ({
+      tasks: state.tasks.map((t) => (t._id === id ? updatedTask : t)),
+    }));
+  },
+
+  deleteTask: async (id) => {
+    await api.delete(`/tasks/${id}`);
+    set((state) => ({
+      tasks: state.tasks.filter((t) => t._id !== id),
+    }));
   },
 
   moveTask: async (taskId, projectId, newStatus, newOrder) => {
@@ -80,6 +101,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       tasks: state.tasks.map((t) =>
         t._id === task._id ? { ...t, status: task.status, order: task.order } : t
       ),
+    })),
+
+  applySocketDelete: ({ _id }) =>
+    set((state) => ({
+      tasks: state.tasks.filter((t) => t._id !== _id),
     })),
 
   clear: () => set({ tasks: [], error: null }),

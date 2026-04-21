@@ -26,7 +26,7 @@ export const createTask = catchAsync(async (req: Request, res: Response, next: N
   project.tasks.push(task.id as any);
   await project.save();
 
-  // Socket broadcast
+  // Socket broadcast to all project room members
   const io = getSocketIO();
   io.to(projectId.toString()).emit('task:create', task);
 
@@ -47,6 +47,26 @@ export const updateTask = catchAsync(async (req: Request, res: Response, next: N
   sendResponse(res, 200, true, 'Task updated successfully', task);
 });
 
+export const deleteTask = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  const task = await Task.findById(id);
+  if (!task) return next(new AppError('Task not found', 404));
+
+  const projectId = task.projectId.toString();
+
+  // Remove task from project's tasks array
+  await Project.findByIdAndUpdate(projectId, { $pull: { tasks: task._id } });
+
+  await Task.findByIdAndDelete(id);
+
+  // Socket broadcast to all project room members
+  const io = getSocketIO();
+  io.to(projectId).emit('task:delete', { _id: id, projectId });
+
+  sendResponse(res, 200, true, 'Task deleted successfully', null);
+});
+
 export const moveTask = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const { newStatus, newOrder } = req.body;
@@ -58,7 +78,6 @@ export const moveTask = catchAsync(async (req: Request, res: Response, next: Nex
   task.order = newOrder;
   await task.save();
 
-  // Optionally you would reorder other tasks here, but often frontend calculates exact floating point order
   // Socket broadcast
   const io = getSocketIO();
   io.to(task.projectId.toString()).emit('task:move', task);
@@ -69,6 +88,6 @@ export const moveTask = catchAsync(async (req: Request, res: Response, next: Nex
 export const getTasksByProject = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { projectId } = req.params;
   const tasks = await Task.find({ projectId }).sort({ order: 1 });
-  
+
   sendResponse(res, 200, true, 'Tasks fetched successfully', tasks);
 });
