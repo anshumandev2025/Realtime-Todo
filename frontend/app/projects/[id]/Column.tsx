@@ -1,65 +1,68 @@
-"use client";
+"use client"
 
-import { useState } from 'react';
-import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useTaskStore, Task } from '@/store/useTaskStore';
-import { toast } from 'sonner';
+import { useState } from "react"
+import { useDroppable } from "@dnd-kit/core"
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useTaskStore, Task } from "@/store/useTaskStore"
+import { toast } from "sonner"
 import TaskCard from "./TaskCard"
 
 interface ColumnProps {
-  id: string;
-  title: string;
-  tasks: Task[];
-  projectId: string;
+  id: string
+  title: string
+  tasks: Task[]
+  projectId: string
 }
 
 export default function Column({ id, title, tasks, projectId }: ColumnProps) {
-  const { setNodeRef } = useDroppable({ id });
-  const { createTask } = useTaskStore();
+  const { setNodeRef } = useDroppable({ id })
+  const { createTask } = useTaskStore()
 
-  const [isAdding, setIsAdding] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false)
+  const [newTitle, setNewTitle] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const handleAdd = async () => {
     if (!newTitle.trim()) {
-      setIsAdding(false);
-      return;
+      setIsAdding(false)
+      return
     }
-    setLoading(true);
+    setLoading(true)
     try {
-      await createTask({ title: newTitle, projectId, status: id });
-      setNewTitle('');
-      setIsAdding(false);
+      await createTask({ title: newTitle, projectId, status: id })
+      setNewTitle("")
+      setIsAdding(false)
     } catch {
-      toast.error('Failed to create task');
+      toast.error("Failed to create task")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="flex flex-col w-80 shrink-0">
-      <div className="bg-muted/50 rounded-xl p-3 flex flex-col">
+    <div className="flex w-80 shrink-0 flex-col">
+      <div className="flex flex-col rounded-xl bg-muted/50 p-3">
         {/* Column header */}
-        <div className="flex items-center justify-between mb-3 px-1">
-          <h3 className="font-semibold text-foreground/80 text-sm uppercase tracking-wide">
+        <div className="mb-3 flex items-center justify-between px-1">
+          <h3 className="text-sm font-semibold tracking-wide text-foreground/80 uppercase">
             {title}
           </h3>
-          <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+          <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
             {tasks.length}
           </span>
         </div>
 
         {/* Drop zone */}
-        <div ref={setNodeRef} className="flex flex-col gap-2 min-h-[100px]">
-          <SortableContext items={tasks.map((t) => t._id)} strategy={verticalListSortingStrategy}>
-            {tasks.map((task) => (
-              <TaskCard key={task._id} task={task} />
+        <div ref={setNodeRef} className="flex min-h-25 flex-col gap-2">
+          <SortableContext
+            items={tasks.map((t) => t._id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {tasks.map((task, index) => (
+              <TaskCard key={index} task={task} />
             ))}
           </SortableContext>
         </div>
@@ -72,15 +75,19 @@ export default function Column({ id, title, tasks, projectId }: ColumnProps) {
               placeholder="Card title…"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
               className="bg-background"
               disabled={loading}
             />
             <div className="flex gap-2">
               <Button size="sm" onClick={handleAdd} disabled={loading}>
-                {loading ? '…' : 'Add card'}
+                {loading ? "…" : "Add card"}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsAdding(false)}
+              >
                 Cancel
               </Button>
             </div>
@@ -89,13 +96,13 @@ export default function Column({ id, title, tasks, projectId }: ColumnProps) {
           <Button
             variant="ghost"
             onClick={() => setIsAdding(true)}
-            className="w-full justify-start mt-2 text-muted-foreground hover:text-foreground"
+            className="mt-2 w-full justify-start text-muted-foreground hover:text-foreground"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             Add a card
           </Button>
         )}
       </div>
     </div>
-  );
+  )
 }
