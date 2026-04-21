@@ -5,7 +5,7 @@ export interface Task {
   _id: string;
   title: string;
   description?: string;
-  status: 'todo' | 'in-progress' | 'done';
+  status:string | 'todo' | 'in-progress' | 'done';
   projectId: string;
   assignedTo?: string[];
   order: number;
@@ -16,6 +16,7 @@ interface TaskState {
   tasks: Task[];
   isLoading: boolean;
   error: string | null;
+  setTasks:(tasks:Task[])=>void;
   fetchTasks: (projectId: string) => Promise<void>;
   createTask: (payload: { title: string; projectId: string; status?: string }) => Promise<Task>;
   moveTask: (taskId: string, projectId: string, newStatus: string, newOrder: number) => Promise<void>;
@@ -29,7 +30,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   isLoading: false,
   error: null,
-
+  setTasks:(tasks)=>set({tasks}),
   fetchTasks: async (projectId) => {
     set({ isLoading: true, error: null });
     try {

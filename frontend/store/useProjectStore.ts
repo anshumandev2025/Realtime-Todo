@@ -13,7 +13,7 @@ interface ProjectState {
   projects: Project[];
   isLoading: boolean;
   error: string | null;
-  fetchProjects: (userId: string) => Promise<void>;
+  fetchProjects: () => Promise<void>;
   createProject: (payload: { name: string; description?: string; }) => Promise<Project>;
   clear: () => void;
 }
@@ -23,10 +23,10 @@ export const useProjectStore = create<ProjectState>((set) => ({
   isLoading: false,
   error: null,
 
-  fetchProjects: async (userId) => {
+  fetchProjects: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { data } = await api.get(`/projects/${userId}`);
+      const { data } = await api.get(`/projects`);
       set({ projects: data.data ?? [], isLoading: false });
     } catch (err: any) {
       set({ error: err.response?.data?.message ?? 'Failed to load projects', isLoading: false });

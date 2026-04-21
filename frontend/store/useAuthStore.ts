@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { registerTokenGetter, registerAuthUpdater, registerLogoutHandler } from '@/lib/api';
 
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   username: string;
   email: string;

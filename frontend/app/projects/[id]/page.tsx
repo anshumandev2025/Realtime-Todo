@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSocket } from '@/hooks/useSocket';
-import { useTasks, useCreateTask, useMoveTask } from '@/hooks/useTasks';
+import { useTasks} from '@/hooks/useTasks';
 import { DndContext, closestCorners, DragOverlay } from '@dnd-kit/core';
 import { useParams } from 'next/navigation';
 import TaskCard from './TaskCard';
@@ -13,49 +13,44 @@ export default function ProjectBoardPage() {
   const params = useParams();
   const projectId = params.id as string;
   const { isAuthenticated } = useAuthStore();
-
-  const { data: tasksData, isLoading } = useTasks(projectId);
-  const moveTaskMutation = useMoveTask();
+  const {moveTask,fetchTasks,isLoading,tasks,setTasks}=useTasks();
   
   const socket = useSocket(projectId);
-
-  // Local state for optimistic UI updates
-  const [tasks, setTasks] = useState<any[]>([]);
   const [activeTask, setActiveTask] = useState<any | null>(null);
 
   useEffect(() => {
-    if (tasksData) {
-      setTasks(tasksData);
+    if (projectId) {
+      fetchTasks(projectId)
     }
-  }, [tasksData]);
+  }, [projectId,fetchTasks]);
 
   // Socket Listeners
-  useEffect(() => {
-    if (!socket) return;
+  // useEffect(() => {
+  //   if (!socket) return;
 
-    socket.on('task:create', (newTask) => {
-      setTasks((prev) => [...prev, newTask]);
-    });
+  //   socket.on('task:create', (newTask) => {
+  //     setTasks((prev) => [...prev, newTask]);
+  //   });
 
-    socket.on('task:update', (updatedTask) => {
-      setTasks((prev) => prev.map(t => t._id === updatedTask._id ? updatedTask : t));
-    });
+  //   socket.on('task:update', (updatedTask) => {
+  //     createTask((prev) => prev.map(t => t._id === updatedTask._id ? updatedTask : t));
+  //   });
 
-    socket.on('task:move', (movedTask) => {
-      setTasks((prev) => prev.map(t => {
-        if (t._id === movedTask._id) {
-          return { ...t, status: movedTask.status, order: movedTask.order };
-        }
-        return t;
-      }));
-    });
+  //   socket.on('task:move', (movedTask) => {
+  //     setTasks((prev) => prev.map(t => {
+  //       if (t._id === movedTask._id) {
+  //         return { ...t, status: movedTask.status, order: movedTask.order };
+  //       }
+  //       return t;
+  //     }));
+  //   });
 
-    return () => {
-      socket.off('task:create');
-      socket.off('task:update');
-      socket.off('task:move');
-    };
-  }, [socket]);
+  //   return () => {
+  //     socket.off('task:create');
+  //     socket.off('task:update');
+  //     socket.off('task:move');
+  //   };
+  // }, [socket]);
 
   const handleDragStart = (event: any) => {
     const { active } = event;
@@ -75,7 +70,7 @@ export default function ProjectBoardPage() {
     const isOverAColumn = overId === 'todo' || overId === 'in-progress' || overId === 'done';
     
     // Compute new status
-    let newStatus = '';
+    let newStatus:string = '';
     if (isOverAColumn) {
       newStatus = overId;
     } else {
@@ -100,7 +95,7 @@ export default function ProjectBoardPage() {
       if (socket) {
         socket.emit('task:client-move', { projectId, taskId: activeId, newStatus, newOrder: 0 }); // Order simplified for this demo
       }
-      moveTaskMutation.mutate({ taskId: activeId, projectId, newStatus, newOrder: 0 });
+      moveTask(activeId, projectId, newStatus, 0);
     }
   };
 

@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 
 export default function DashboardPage() {
   const { user, isAuthenticated  } = useAuthStore();
-  const { projects, isLoading, error, fetchProjects, createProject, clear } = useProjectStore();
+  const { projects, isLoading, fetchProjects, createProject, clear } = useProjectStore();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
@@ -25,12 +25,12 @@ export default function DashboardPage() {
   const [creating, setCreating] = useState(false);
   // Fetch whenever the active org changes
   useEffect(() => {
-    if (user?.id) {
-      fetchProjects(user.id);
+    if (user?._id) {
+      fetchProjects();
     } else {
       clear();
     }
-  }, [user?.id, fetchProjects, clear]);
+  }, [user?._id, fetchProjects, clear]);
 
   if (!isAuthenticated) {
     return <div className="p-8 text-center">Please log in to view the dashboard.</div>;
@@ -107,8 +107,6 @@ export default function DashboardPage() {
             <Skeleton key={i} className="h-32 rounded-xl" />
           ))}
         </div>
-      ) : error ? (
-        <div className="text-destructive">{error}</div>
       ) : projects.length === 0 ? (
         <div className="text-center py-20 border-2 border-dashed rounded-xl bg-muted/20">
           <p className="text-muted-foreground mb-4">No projects yet created.</p>
