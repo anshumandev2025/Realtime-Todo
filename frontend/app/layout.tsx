@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Providers from "@/components/providers";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
+import AuthInitializer from "@/components/AuthInitializer";
 const inter = Inter({subsets:['latin'],variable:'--font-sans'})
 
 const fontMono = Geist_Mono({
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <Providers>
+            <AuthInitializer />
             <Navbar />
             {children}
             <Toaster />
