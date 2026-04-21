@@ -57,6 +57,7 @@ export default function RegisterPage() {
       setUser(data.data.user, data.data.accessToken);
       toast.success('Account created successfully');
       router.push('/dashboard');
+
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Registration failed');
     } finally {
@@ -91,11 +92,11 @@ export default function RegisterPage() {
             <FormField control={form.control} name="accountType" render={({ field }) => (
               <FormItem>
                 <FormLabel>Account Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select  onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger><SelectValue placeholder="Select account type" /></SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent position='item-aligned'>
                     <SelectItem value="individual">Individual</SelectItem>
                     <SelectItem value="organization_owner">Organization Owner</SelectItem>
                   </SelectContent>

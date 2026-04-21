@@ -1,9 +1,8 @@
-import { Geist, Geist_Mono, Inter } from "next/font/google"
+import { Geist_Mono, Inter } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils";
-import Providers from "@/components/providers";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import AuthInitializer from "@/components/AuthInitializer";
@@ -27,12 +26,10 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <Providers>
             <AuthInitializer />
             <Navbar />
             {children}
             <Toaster />
-          </Providers>
         </ThemeProvider>
       </body>
     </html>
